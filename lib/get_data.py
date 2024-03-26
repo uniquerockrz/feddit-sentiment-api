@@ -1,9 +1,11 @@
+"""Get the data from the API and create a CSV file from it"""
+#pylint: disable=redefined-outer-name
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-data_path = 'data/comments.csv'
+from .api import get_subfeddits, get_comments
 
-from api import get_subfeddits, get_comments
+DATA_PATH = 'data/comments.csv'
 
 # we first get all the subfeddit IDs
 subfeddit_ids = []
@@ -15,13 +17,14 @@ for subfeddit in get_subfeddits()['subfeddits']:
 
 # now we have to get the comments and store that into a dataframe
 def get_all_comments_subfeddit(subfeddit_id):
+    """Get All Comments From A Subfeddit"""
     start_index = 0
     page_size = 1000
     has_comments = True
 
     comments_list = []
 
-    while(has_comments):
+    while has_comments:
         comments = get_comments(subfeddit_id=subfeddit_id, skip=start_index, limit=page_size)
 
         if len(comments['comments']) > 0:
@@ -50,6 +53,7 @@ df = pd.concat(comment_dataframes)
 print('Running Sentiment Analysis')
 
 def get_comment_sentiment(comment_text):
+    """Get A Comment Sentiment And Apply This On A Pandas Dataframe"""
     analyzer = SentimentIntensityAnalyzer()
     scores = analyzer.polarity_scores(comment_text)
     sentiment_class = ''
@@ -59,9 +63,10 @@ def get_comment_sentiment(comment_text):
         sentiment_class = 'neutral'
     else:
         sentiment_class = 'negative'
-    
+
     return (sentiment_class, scores['compound'])
 
-df[['sentiment_class', 'sentiment_score']] = df['text'].apply(get_comment_sentiment).apply(pd.Series)
+df[['sentiment_class',
+    'sentiment_score']] = df['text'].apply(get_comment_sentiment).apply(pd.Series)
 
-df.to_csv(data_path, index=False)
+df.to_csv(DATA_PATH, index=False)
