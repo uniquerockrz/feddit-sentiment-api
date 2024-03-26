@@ -9,11 +9,14 @@ def get_comments_from_dataset(df, subfeddit_id=None, subfeddit_name=None, limit=
     elif subfeddit_name != None:
         df = df[df['subfeddit_name'] == subfeddit_name] 
     else:
-        df = df[df['subfeddit_id'] == subfeddit_id] 
+        df = df[df['subfeddit_id'] == int(subfeddit_id)]
+
+    if (((start_date == None) and (end_date != None)) or ((start_date != None) and (end_date == None))):
+        raise NoSubfeddit('Please provide both start and end date for filtering')
 
     if (start_date != None) and (end_date != None):
         # find comments in that date range
-        df = df[(df['created_at'] >= start_date) & (df['created_at'] <= end_date)]
+        df = df[(df['created_at'] >= int(start_date)) & (df['created_at'] <= int(end_date))]
     
     if sorted_by_polarity == False:
         # return the most recent comments by default, with a skip and limit
