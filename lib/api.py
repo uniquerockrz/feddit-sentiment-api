@@ -2,7 +2,9 @@
 
 import os
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 class APIException(Exception):
     """Custom Exception for the API"""
 
